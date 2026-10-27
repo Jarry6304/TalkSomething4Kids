@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>零碎時間問答練習</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&display=swap">
+<style>
+  :root { --ink: #33302c; --muted: #6b665e; --line: #e8e1d3; --paper: #ffffff; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font-family: 'Huninn', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+    font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+  button:disabled { opacity: .4; cursor: default; }
+  button:focus-visible { outline: 3px solid #6EA9E0; outline-offset: 2px; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 16px 16px 40px; }
+  .hidden { display: none !important; }
+
+  /* home */
+  .hero { display: flex; align-items: center; gap: 12px; margin: 8px 0 6px; }
+  .hero h1 { margin: 0; font-size: 26px; line-height: 1.2; letter-spacing: 1px; }
+  .hero p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+  .rules { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 18px; }
+  .rules span { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  @media (min-width: 560px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .tile { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 10px 14px; border-radius: 22px; border: 2.5px solid var(--tile-line); background: var(--tile-fill); min-height: 150px; text-align: center; transition: transform .12s ease; }
+  .tile:active { transform: scale(.97); }
+  .tile svg { width: 56px; height: 56px; }
+  .tile .name { font-size: 20px; font-weight: 700; }
+  .tile .tip { font-size: 12px; color: var(--tile-ink); font-weight: 700; }
+  .tile .count { font-size: 11px; color: var(--muted); }
+  .foot { margin-top: 28px; font-size: 12px; color: var(--muted); text-align: center; }
+
+  /* slot */
+  .top { display: flex; align-items: center; gap: 10px; margin: 4px 0 12px; }
+  .back { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; color: var(--muted); padding: 8px 10px 8px 4px; border-radius: 999px; }
+  .top .ttl { display: flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 700; margin-left: auto; }
+  .top .ttl svg { width: 34px; height: 34px; }
+  .tipbar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 16px; background: var(--s-fill); border: 2px solid var(--s-line); font-size: 14px; margin-bottom: 12px; }
+  .tipbar b { color: var(--s-ink); white-space: nowrap; }
+  .track { display: flex; gap: 4px; margin: 0 2px 10px; }
+  .track span { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+  .track span.on { background: var(--s-line); }
+  .track span.cur { background: var(--s-ink); }
+  .meta { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); margin: 0 4px 6px; }
+  .meta .kind { font-weight: 700; }
+  .meta .kind.open { color: var(--s-ink); }
+  .meta .tag { font-weight: 700; color: var(--s-ink); background: var(--s-fill); padding: 2px 10px; border-radius: 999px; font-size: 12px; }
+  .card { position: relative; border: 2.5px solid var(--s-line); border-radius: 24px; background: #fff; padding: 22px 22px 22px; min-height: 160px; display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+  .card .chain { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--s-ink); }
+  .card .chain .dots { display: flex; gap: 4px; }
+  .card .chain .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--s-fill); border: 1.5px solid var(--s-line); }
+  .card .chain .dots i.on { background: var(--s-line); }
+  .card .q { font-size: 24px; line-height: 1.45; font-weight: 700; text-wrap: balance; }
+  .card.say { background: var(--s-fill); }
+  .card.say .q { font-size: 21px; }
+  .card .tail { position: absolute; left: 34px; bottom: -11px; width: 20px; height: 20px; background: #fff; border-right: 2.5px solid var(--s-line); border-bottom: 2.5px solid var(--s-line); transform: rotate(45deg); }
+  .card.say .tail { background: var(--s-fill); }
+  .helpers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 22px; }
+  .helper { padding: 12px; border-radius: 16px; border: 2px dashed var(--s-line); background: #fff; text-align: left; min-height: 52px; }
+  .helper .lbl { font-size: 12px; font-weight: 700; color: var(--s-ink); display: flex; align-items: center; gap: 6px; }
+  .helper .lbl svg { width: 16px; height: 16px; flex: none; }
+  .helper .body { font-size: 15px; margin-top: 6px; display: none; line-height: 1.4; }
+  .helper.open { background: var(--s-fill); border-style: solid; }
+  .helper.open .body { display: block; }
+  .helper .body ol { margin: 0; padding-left: 18px; }
+  .helper .body .extra { margin-top: 6px; font-size: 13px; color: var(--muted); }
+  .helper .body .extra b { color: var(--s-ink); }
+  .actions { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+  .count5 { flex: none; width: 72px; height: 72px; border-radius: 50%; border: 3px solid var(--s-line); background: #fff; font-size: 13px; font-weight: 700; color: var(--s-ink); display: flex; align-items: center; justify-content: center; line-height: 1.1; text-align: center; }
+  .count5.run { background: var(--s-fill); font-size: 30px; }
+  .count5.done { background: var(--s-line); color: #fff; font-size: 13px; }
+  .next { flex: 1; height: 60px; border-radius: 18px; background: var(--s-line); color: #fff; font-size: 19px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 0 rgba(0,0,0,.12); padding: 0 12px; }
+  .next:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.12); }
+  .sub { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+  .sub button { padding: 8px 10px; border-radius: 999px; font-weight: 700; color: var(--muted); }
+  .sub button.on { background: var(--s-fill); color: var(--s-ink); }
+  .list { margin-top: 10px; border: 2px solid var(--line); border-radius: 18px; padding: 4px 14px 8px; }
+  .list h4 { margin: 10px 0 2px; font-size: 12px; color: var(--s-ink); }
+  .list .row { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1.5px dashed var(--line); font-size: 15px; align-items: flex-start; }
+  .list .row:last-child { border-bottom: 0; }
+  .list .row .n { flex: none; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 13px; background: var(--s-fill); color: var(--s-ink); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+  .list .row.done { color: var(--muted); }
+  .list .row.cur .n { background: var(--s-line); color: #fff; }
+  .list .row.spare { color: var(--muted); }
+  .list .row button { text-align: left; flex: 1; }
+</style>
+</head>
+<body>
+
+<main id="home" class="wrap">
+  <div class="hero">
+    <svg width="64" height="44" viewBox="0 0 64 44" role="img" aria-label="微笑的小汽車"><path d="M8 30L14 16Q16 12 20 12H44Q48 12 50 16L56 30H8Z" fill="#FFDADA" stroke="#E57B7B" stroke-width="2.5" stroke-linejoin="round"/><rect x="4" y="28" width="56" height="10" rx="5" fill="#E57B7B"/><circle cx="18" cy="38" r="5" fill="#33302c"/><circle cx="46" cy="38" r="5" fill="#33302c"/><circle cx="18" cy="38" r="2" fill="#fff"/><circle cx="46" cy="38" r="2" fill="#fff"/><circle cx="25" cy="21" r="3.5" fill="#33302c"/><circle cx="39" cy="21" r="3.5" fill="#33302c"/><circle cx="26.2" cy="19.8" r="1.2" fill="#fff"/><circle cx="40.2" cy="19.8" r="1.2" fill="#fff"/><circle cx="19" cy="25" r="2" fill="#F7A8A8"/><circle cx="45" cy="25" r="2" fill="#F7A8A8"/><path d="M28 25Q32 29 36 25" stroke="#33302c" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    <div>
+      <h1>零碎時間 問答練習</h1>
+      <p>每段：固定開場 → 今天抽到的補充 → 收尾</p>
+    </div>
+  </div>
+  <div class="rules">
+    <span style="background:#D6EAFF;color:#2f6fa8">問完數到五</span>
+    <span style="background:#D5F3E0;color:#2e7d4f">不知道 → 給他幾個選</span>
+    <span style="background:#E7DCF8;color:#6a4fb8">沉默兩次，今天這段停</span>
+  </div>
+  <div class="grid" id="tiles"></div>
+  <p class="foot">他說了一個詞就擴句再追問；他反問「為什麼」就真解釋兩句，再問「你覺得呢？」</p>
+</main>
+
+<main id="slot" class="wrap hidden">
+  <div class="top">
+    <button class="back" id="back" aria-label="回主頁"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>主頁</button>
+    <div class="ttl"><span id="slotIcon"></span><span id="slotName"></span></div>
+  </div>
+  <div class="tipbar"><b>一招</b><span id="slotTip"></span></div>
+  <div class="track" id="track"></div>
+  <div class="meta"><span class="kind" id="kind"></span><span class="tag" id="tag"></span></div>
+  <div class="card" id="card"><div class="chain hidden" id="chainHead"></div><div class="q" id="q"></div><div class="tail"></div></div>
+  <div class="helpers">
+    <button class="helper" id="hAlt" aria-expanded="false">
+      <span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V10M12 10L5 4M12 10l7-6M12 10v0"/></svg><span id="altLbl">不知道 → 給他幾個選</span></span>
+      <span class="body" id="alt"></span>
+    </button>
+    <button class="helper" id="hMore" aria-expanded="false">
+      <span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h12M13 6l6 6-6 6"/></svg><span id="moreLbl">說了 → 追問</span></span>
+      <span class="body" id="more"></span>
+    </button>
+  </div>
+  <div class="actions">
+    <button class="count5" id="count5" aria-label="數到五">數到<br>五</button>
+    <button class="next" id="next">下一題</button>
+  </div>
+  <div class="sub">
+    <button id="draw">再抽一題補充</button>
+    <button id="toggleList">看全部題目</button>
+    <button id="reshuffle">重新洗牌</button>
+  </div>
+  <div class="list hidden" id="list"></div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var ICONS = {
+    wake: '<svg viewBox="0 0 24 24" fill="none" stroke="#8a6400" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="#FFF1B8"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/><circle cx="10.3" cy="11.2" r=".9" fill="#8a6400"/><circle cx="13.7" cy="11.2" r=".9" fill="#8a6400"/><path d="M10.4 13.6q1.6 1.3 3.2 0"/></svg>',
+    school: '<svg viewBox="0 0 24 24" fill="none" stroke="#2f6fa8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 15l2-6a2 2 0 0 1 1.9-1.3h10.2A2 2 0 0 1 19 9l2 6v3H3z" fill="#D6EAFF"/><circle cx="7.5" cy="18" r="1.6" fill="#fff"/><circle cx="16.5" cy="18" r="1.6" fill="#fff"/><circle cx="9.5" cy="11.5" r="1" fill="#2f6fa8"/><circle cx="14.5" cy="11.5" r="1" fill="#2f6fa8"/><path d="M10.5 14q1.5 1.2 3 0"/></svg>',
+    pickup: '<svg viewBox="0 0 24 24" fill="none" stroke="#2e7d4f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="7" width="14" height="14" rx="4" fill="#D5F3E0"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/><circle cx="9.5" cy="12" r="1" fill="#2e7d4f"/><circle cx="14.5" cy="12" r="1" fill="#2e7d4f"/><path d="M10 15q2 1.6 4 0"/></svg>',
+    meal: '<svg viewBox="0 0 24 24" fill="none" stroke="#b8484b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7" fill="#FFDADA"/><path d="M3 4v5M3 9v11M21 4c-2 1-2 4-2 6v10"/><circle cx="9.5" cy="11" r="1" fill="#b8484b"/><circle cx="14.5" cy="11" r="1" fill="#b8484b"/><path d="M9.8 14q2.2 1.8 4.4 0"/></svg>',
+    bath: '<svg viewBox="0 0 24 24" fill="none" stroke="#237a84" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16v3a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z" fill="#D3F0F3"/><path d="M6 12V6a2 2 0 0 1 4 0"/><path d="M7 19l-1 2M17 19l1 2"/><circle cx="14" cy="6" r="1.4"/><circle cx="18" cy="8.5" r="1"/><circle cx="16.5" cy="3.5" r=".8"/><circle cx="9.5" cy="15" r=".9" fill="#237a84"/><circle cx="14.5" cy="15" r=".9" fill="#237a84"/><path d="M10.2 17q1.8 1.2 3.6 0"/></svg>',
+    bed: '<svg viewBox="0 0 24 24" fill="none" stroke="#6a4fb8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="#E7DCF8"/><path d="M11 12.5q1.2 1.2 2.4 0"/><path d="M15 4h3l-3 3h3"/><path d="M4.5 3.5l.7 1.5 1.6.2-1.2 1.1.3 1.6-1.4-.8-1.4.8.3-1.6L2.2 5.2l1.6-.2z" fill="#6a4fb8" stroke="none"/></svg>'
+  };
+
+  // 結構：open = 每日固定開場（照順序）；pool = 補充題（每天抽 4 題）；close = 固定收尾
+  // 單題 { q, tag, alt, more? }；鏈 { chain, tag, steps:[{q, alt, more?}] } 整組照順序出，不拆
+  // alt = 他說不知道時給的選項（三選＋「還是別的」）；probes = 這個時段每題都用的追問；more = 這題專屬再追問
+  var SLOTS = [
+    {
+      id: 'wake', name: '起床', tip: '先旁白一句不問；他動手了再問計畫', fill: '#FFF1B8', line: '#E3B341', ink: '#8a6400',
+      probes: ['第一步先做什麼？', '然後呢？', '為什麼這樣排？'],
+      open: [
+        { q: '（先旁白，不問）「你在接紅色那塊，看起來是車的前面。」然後等他開口。', tag: '旁白', say: true, alt: '他沒接話 → 再旁白一句就好：「你把它放在最上面了。」還是沒說，今天不問。', more: ['他說了任何一個詞 → 擴成完整句再追問一個'] },
+        { q: '你今天要蓋什麼？第一塊要放哪裡？', tag: '計畫', alt: '蓋車子、蓋房子、蓋停車場，還是別的？', more: ['蓋好之後它要去哪裡？'] }
+      ],
+      pool: [
+        { q: '起床之後第一件事要做什麼？再來呢？', tag: '順序', alt: '上廁所、喝水、換衣服，先哪個？', more: ['最後一件是什麼？'] },
+        { q: '今天想穿哪一件衣服？為什麼選這件？', tag: '選擇', alt: '藍色那件、有車車那件，還是你自己挑一件？', more: ['這件哪裡最好看？'] },
+        { q: '今天早上想先玩樂高、陀螺，還是著色？為什麼？', tag: '選擇', alt: '樂高、陀螺、著色，先哪個？', more: ['要玩多久？時鐘走到哪裡要停？'] },
+        { q: '這台車蓋好要去哪裡比賽？對手是誰？', tag: '想像', alt: '山上、海邊、停車場，還是別的地方？', more: ['你猜誰會贏？為什麼？'] },
+        { chain: '陀螺實驗', tag: '預測', steps: [
+          { q: '兩顆陀螺一起轉，你猜哪一顆轉比較久？為什麼？', alt: '大的那顆、小的那顆，還是一樣久？' },
+          { q: '轉完了！跟你猜的一樣嗎？為什麼？', alt: '一樣、不一樣，還是差一點點？' },
+          { q: '怎麼讓輸的那顆轉更久？再試一次看看。', alt: '用力一點、換地板、還是換發射器？' }
+        ] },
+        { q: '為什麼陀螺轉一轉會停下來？', tag: '為什麼', alt: '是沒力氣了、碰到東西了，還是地板太滑？', more: ['怎麼讓它轉更久？'] },
+        { q: '如果樂高的輪子是方形的，車子會怎樣？', tag: '如果', alt: '會跑得動、會卡住，還是會跳？', more: ['為什麼圓的可以滾？'] },
+        { q: '襪子要先穿哪一隻？為什麼？', tag: '選擇', alt: '左腳、右腳，還是一起？', more: ['兩隻襪子一樣嗎？哪裡一樣？'] },
+        { q: '著色畫這台車你想塗什麼顏色？為什麼選這個？', tag: '選擇', alt: '紅色、藍色、黃色，還是混色？', more: ['你看過什麼車是這個顏色？'] },
+        { q: '積木掉在地上找不到，你會怎麼找？', tag: '解決', alt: '先看桌子下、沙發下，還是妹妹手上？', more: ['還有哪裡可能？'] },
+        { q: '噴防蚊液是為了什麼？不噴會怎樣？', tag: '為什麼', alt: '蚊子會來、會癢，還是沒事？', more: ['蚊子為什麼會咬人？'] },
+        { q: '戴口罩之前要先做什麼？為什麼是這個順序？', tag: '順序', alt: '先洗手、先噴防蚊液，還是先戴眼鏡？', more: ['順序換掉會怎樣？'] },
+        { q: '幫你的陀螺取個名字！它的必殺技是什麼？', tag: '想像', alt: '叫閃電、火焰、鋼鐵，還是你自己取？', more: ['必殺技要怎麼使出來？'] },
+        { q: '今天的車要有幾個輪子？為什麼是這個數字？', tag: '計畫', alt: '兩個、四個、六個，還是更多？', more: ['輪子放哪裡才不會倒？'] },
+        { q: '你猜這台車蓋好會比妹妹高，還是比桌子高？', tag: '預測', alt: '比妹妹高、比桌子高，還是都比不過？', more: ['蓋好量量看！'] },
+        { q: '如果只剩五塊積木，你要蓋什麼？', tag: '如果', alt: '小車、小房子，還是你自己想一個？', more: ['五塊要怎麼放？'] },
+        { q: '陀螺發射器要怎麼拉才會轉最快？你來教我。', tag: '小老師', alt: '用力拉、慢慢拉，還是拉到一半？', more: ['試試看，跟你說的一樣嗎？'] },
+        { q: '這台車要給誰開？它要去接誰？', tag: '想像', alt: '給你開、給爸爸開，還是給陀螺開？', more: ['接到之後要去哪裡？'] }
+      ],
+      close: [
+        { q: '還有三分鐘要吃早餐。你要停在這裡、再放三塊，還是拍一張照片明天接著蓋？', tag: '選擇', alt: '停、三塊，還是拍照？', more: ['回家要從哪裡接著蓋？'] }
+      ]
+    },
+    {
+      id: 'school', name: '上學', tip: '早餐談等一下學校的事；路上的車是現成教材', fill: '#D6EAFF', line: '#6EA9E0', ink: '#2f6fa8',
+      probes: ['你怎麼知道的？', '然後呢？', '還有別的可能嗎？'],
+      open: [
+        { q: '到學校第一件事做什麼？然後呢？再然後呢？', tag: '順序', alt: '放書包、找老師、去學習區，先哪個？', more: ['第三步是什麼？'] },
+        { q: '今天最想去哪個學習區？在那裡要做什麼？', tag: '計畫', alt: '積木區、美勞區、娃娃家，還是別的區？', more: ['要跟誰一起？'] }
+      ],
+      pool: [
+        { q: '你們班現在的主題是什麼？老師今天可能會叫你們做什麼？', tag: '預測', alt: '畫畫、做實驗、唱歌，還是別的？', more: ['你猜會先做哪一個？'] },
+        { q: '如果你想去的區已經有人在那裡，你會怎麼辦？', tag: '如果', alt: '等一下、一起玩、先去別區，哪個？', more: ['一起的話你負責哪邊？'] },
+        { q: '那台車為什麼停在那裡？', tag: '觀察', alt: '它壞了、在等人、在送貨，還是別的？', more: ['哪裡看出來的？'] },
+        { q: '剛剛過去的三台車，哪一台跟另外兩台不一樣？', tag: '比較', alt: '顏色、大小、輪子數量，哪裡不一樣？', more: ['卡車跟轎車差在哪裡？'] },
+        { q: '紅綠燈為什麼要有三種顏色？', tag: '為什麼', alt: '給車看、給人看，還是給警察看？', more: ['如果只有綠燈會怎樣？'] },
+        { q: '公車跟我們的車哪裡不一樣？', tag: '比較', alt: '比較長、門比較多、人比較多，還是別的？', more: ['為什麼公車要那麼大？'] },
+        { q: '如果所有車的輪子都是方的，路上會變怎樣？', tag: '如果', alt: '會很吵、會動不了、會一直跳，還是別的？', more: ['為什麼圓的輪子可以滾？'] },
+        { q: '牛奶為什麼是涼的？', tag: '為什麼', alt: '放冰箱、剛從店裡買來，還是外面很冷？', more: ['放在外面一整天會怎樣？'] },
+        { q: '今天在學校你想跟誰一起玩？要玩什麼？', tag: '計畫', alt: '跟常常一起的那個、找新的人，還是自己玩？', more: ['他會想玩嗎？你要怎麼問他？'] },
+        { q: '換你出一題考我，我來猜！', tag: '出題', alt: '車子的、學校的、妹妹的，哪一種題目？', more: ['我猜錯了，再給我一個提示！'] },
+        { q: '路上看到什麼東西是圓的？什麼是方的？', tag: '觀察', alt: '輪子、招牌、窗戶，哪個是圓的？', more: ['再找一個！'] },
+        { q: '你覺得老師早上到學校會先做什麼？', tag: '猜心', alt: '開門、泡茶、擺椅子，還是別的？', more: ['為什麼你這樣猜？'] },
+        { q: '如果今天下雨，下課不能去操場，你會想做什麼？', tag: '如果', alt: '看書、玩積木、畫畫，還是別的？', more: ['要找誰一起？'] },
+        { q: '今天有英文課嗎？你怎麼知道？', tag: '時間', alt: '看今天星期幾、看書包裡有沒有英文本，還是問我？', more: ['英文課你最喜歡哪個遊戲？'] },
+        { q: '到學校要跟老師說什麼？為什麼要打招呼？', tag: '為什麼', alt: '早安、你好、老師好，哪一句？', more: ['老師聽到會怎樣？'] },
+        { q: '走路去學校和坐車去，哪個比較快？為什麼？', tag: '比較', alt: '走路、坐車、騎腳踏車，哪個快？', more: ['哪一個比較好玩？'] },
+        { q: '救護車為什麼要叫得那麼大聲？', tag: '為什麼', alt: '要大家讓路、要大家過來看，還是要叫醒病人？', more: ['聽到的時候其他車要怎麼做？'] },
+        { q: '今天路上你想找什麼車？找到了要跟我說它在做什麼。', tag: '觀察', alt: '公車、垃圾車、工程車，還是別的？', more: ['它要去哪裡？'] },
+        { q: '如果今天換一個新老師來，你會怎麼辦？', tag: '如果', alt: '跟他打招呼、問他名字，還是先觀察他？', more: ['你想知道他什麼？'] }
+      ],
+      close: [
+        { q: '放學的時候我會問你「今天最好玩的一件事」，你先猜猜看會是什麼？', tag: '預測', alt: '積木區的事、操場的事、點心的事，還是別的？', more: ['為什麼你覺得是這個？'] }
+      ]
+    },
+    {
+      id: 'pickup', name: '放學', tip: '接早上的預告；他講一個詞就擴句，再問一個', fill: '#D5F3E0', line: '#58B37F', ink: '#2e7d4f',
+      probes: ['在哪裡？', '跟誰？', '然後呢？', '為什麼？'],
+      open: [
+        { q: '早上說好的！今天最好玩的一件事是什麼？', tag: '回憶', alt: '從早上到放學中間挑一件：教室的、操場的、點心的，還是別的？', more: ['後來怎麼了？'] },
+        { q: '今天在哪個學習區？做了什麼？', tag: '回憶', alt: '積木區、美勞區、娃娃家，還是別的？', more: ['做到一半有發生什麼事嗎？'] }
+      ],
+      pool: [
+        { q: '今天的點心是什麼？好吃嗎？為什麼？', tag: '回憶', alt: '甜的、鹹的，還是脆脆的？', more: ['你比較想吃哪一種？'] },
+        { q: '今天老師有講故事嗎？故事裡發生什麼事？', tag: '說給我聽', alt: '動物的、人的、車子的，還是別的？', more: ['最後怎麼了？'] },
+        { q: '今天有誰讓你很開心？他做了什麼？', tag: '心情', alt: '同學、老師，還是你自己？', more: ['你有跟他說什麼嗎？'] },
+        { q: '今天有沒有生氣或難過的時候？發生什麼事？', tag: '心情', alt: '東西被拿走、沒排到、被說不行，還是別的？', more: ['那時候你怎麼辦？'] },
+        { q: '今天蓋的東西跟昨天的有什麼不一樣？', tag: '比較', alt: '比較高、比較長、多了輪子，還是別的？', more: ['為什麼要這樣改？'] },
+        { q: '今天有人哭嗎？你覺得他為什麼哭？', tag: '猜心', alt: '跌倒、想媽媽、東西壞了，還是別的？', more: ['你會怎麼幫他？'] },
+        { q: '今天下課玩了什麼？規則是什麼？', tag: '說給我聽', alt: '追來追去的、輪流的、躲起來的，哪一種？', more: ['誰贏了？怎樣算贏？'] },
+        { q: '老師今天有說什麼新的詞嗎？是什麼意思？', tag: '語詞', alt: '東西的名字、一個動作，還是一種感覺？', more: ['你可以用它說一句話嗎？'] },
+        { q: '今天跟昨天比，哪一天比較好玩？為什麼？', tag: '比較', alt: '今天、昨天，還是一樣好玩？', more: ['差在哪裡？'] },
+        { q: '如果明天可以再玩一次今天的遊戲，你想改哪裡？', tag: '如果', alt: '改規則、改地方、改人數，還是別的？', more: ['改了會更好玩嗎？'] },
+        { q: '今天有沒有一件事你本來不會，後來會了？', tag: '回憶', alt: '手做的、說話的、跑跳的，哪一種？', more: ['誰教你的？怎麼教？'] },
+        { q: '你覺得今天老師心情怎麼樣？你怎麼看出來的？', tag: '猜心', alt: '開心、累累的、有點生氣，還是別的？', more: ['她做了什麼讓你這樣想？'] },
+        { q: '今天在學校你幫了誰？或是誰幫了你？', tag: '回憶', alt: '你幫別人、別人幫你，還是一起合作？', more: ['他說了什麼？'] },
+        { q: '今天學校有什麼味道？有什麼聲音？', tag: '觀察', alt: '飯的味道、顏料的味道、消毒水的味道，還是別的？', more: ['你喜歡嗎？'] },
+        { q: '今天學了什麼？教我一個！', tag: '小老師', alt: '一個單字、一首歌、一個動作，教哪個？', more: ['要怎麼唸？再一次！'] },
+        { q: '今天有沒有輪到你當小幫手？做了什麼？', tag: '回憶', alt: '擦桌子、發東西、排隊長，還是別的？', more: ['難不難？哪裡難？'] },
+        { q: '今天誰的作品你覺得最厲害？厲害在哪裡？', tag: '比較', alt: '蓋得高、顏色多、很像真的，還是別的？', more: ['你想試試看嗎？'] },
+        { q: '今天有沒有一件事，你本來想做卻沒做到？', tag: '回憶', alt: '想去的區沒去成、想玩的沒輪到，還是別的？', more: ['明天可以怎麼辦？'] }
+      ],
+      close: [
+        { q: '爸爸今天也有一件事：（講一個先…然後…最後的小事）你猜後來怎麼了？', tag: '預測', alt: '修好了、沒修好，還是找別人幫忙？', more: ['你覺得我應該怎麼做？'] },
+        { q: '回家要把今天的事講給媽媽聽，你會先講哪一件？', tag: '計畫', alt: '好玩的、難過的、新學的，先講哪個？', more: ['第二件呢？'] }
+      ]
+    },
+    {
+      id: 'meal', name: '吃飯', tip: '大人先講一件事（先…然後…最後），再換他', fill: '#FFDADA', line: '#E57B7B', ink: '#b8484b',
+      probes: ['然後呢？', '最後呢？', '為什麼？'],
+      open: [
+        { q: '（爸爸先講）「我今天一件事：先…然後…最後…」媽媽問爸爸一個為什麼。', tag: '示範', say: true, alt: '還沒想到講什麼？出門路上、工作上一件小事、或今天看到的東西都可以。', more: ['講完換媽媽講一件，爸爸問媽媽一個為什麼'] },
+        { q: '換你！今天一件事：先…然後…最後…', tag: '說給我聽', alt: '學校的、家裡的、路上的，講哪一件？', more: ['講完只問一次「為什麼」，全桌不插話'] },
+        { q: '換你問我一個「為什麼」！', tag: '出題', alt: '問為什麼壞掉、為什麼要修、為什麼那麼久，還是別的？', more: ['你覺得我答得對嗎？'] }
+      ],
+      pool: [
+        { q: '湯為什麼是燙的？', tag: '為什麼', alt: '剛煮好、放太陽下，還是火還開著？', more: ['怎麼讓它快一點變涼？'] },
+        { q: '如果今天的菜都不放鹽，會變怎樣？', tag: '如果', alt: '沒味道、更好吃，還是一樣？', more: ['鹽是從哪裡來的？'] },
+        { q: '飯是用什麼做的？', tag: '為什麼', alt: '米、麵粉、馬鈴薯，哪一個？', more: ['米是怎麼變成飯的？'] },
+        { q: '為什麼吃飯用筷子，喝湯要用湯匙？', tag: '為什麼', alt: '筷子會漏、湯匙比較大，還是習慣？', more: ['用筷子喝湯會怎樣？'] },
+        { q: '妹妹吃飯的時候跟你有什麼不一樣？', tag: '比較', alt: '用手、用湯匙，還是媽媽餵？', more: ['你以前也是這樣嗎？'] },
+        { q: '這道菜是怎麼煮出來的？你猜猜看順序。', tag: '順序', alt: '先切、先炒、先洗，哪個先？', more: ['為什麼要先那個？'] },
+        { q: '如果冰箱壞掉了，裡面的東西會怎樣？', tag: '如果', alt: '會壞掉、會變冰，還是會不見？', more: ['我們要怎麼辦？'] },
+        { q: '今天的菜裡，最喜歡哪一樣？不想吃哪一樣？為什麼？', tag: '選擇', alt: '肉、菜、湯，最喜歡哪個？', more: ['不喜歡的是味道，還是口感？'] },
+        { q: '我們家誰吃飯最快？為什麼他比較快？', tag: '觀察', alt: '爸爸、媽媽、你，誰最快？', more: ['吃太快會怎樣？'] },
+        { q: '媽媽剛剛講的事，你記得哪一段？', tag: '說給我聽', alt: '開頭、中間，還是結尾？', more: ['你有什麼想問她的？'] },
+        { q: '你覺得今天誰煮得最辛苦？要怎麼跟他說？', tag: '心情', alt: '媽媽、奶奶、外婆，還是別人？', more: ['說了之後他會怎樣？'] },
+        { q: '今天桌上的菜，哪一道是最後煮好的？你怎麼猜的？', tag: '推理', alt: '湯、炒的菜，還是飯？', more: ['最先煮好的呢？'] },
+        { q: '這道菜如果加一樣東西會更好吃，你會加什麼？', tag: '如果', alt: '蛋、起司、玉米，還是別的？', more: ['加了味道會變怎樣？'] },
+        { q: '為什麼熱的菜會冒煙？冰飲料的杯子外面為什麼會有水？', tag: '為什麼', alt: '因為熱氣跑出來、因為水跑出來，還是別的原因？', more: ['煙跑到哪裡去了？'] },
+        { q: '媽媽今天講的事，你來講一次給妹妹聽。', tag: '說給我聽', alt: '從開頭講、從最好笑的地方講，還是從結尾講？', more: ['妹妹聽得懂嗎？哪裡要講慢一點？'] },
+        { q: '今天誰講的事最好笑？哪裡好笑？', tag: '比較', alt: '爸爸的、媽媽的，還是你的？', more: ['還有誰會覺得好笑？'] },
+        { q: '如果一家人輪流煮一天，你那天要煮什麼？要先買什麼？', tag: '計畫', alt: '蛋炒飯、水餃、咖哩，還是別的？', more: ['要去哪裡買？'] }
+      ],
+      close: [
+        { q: '明天晚餐你想吃什麼？為什麼？', tag: '選擇', alt: '咖哩、麵、飯糰，還是別的？', more: ['隔天告訴他有沒有採用、為什麼'] },
+        { q: '吃完之後第一步做什麼？然後呢？', tag: '順序', alt: '餐具放水槽、擦嘴、擦桌子，先哪個？', more: ['為什麼要這樣做？'] }
+      ]
+    },
+    {
+      id: 'bath', name: '洗澡', tip: '一次一個實驗：先猜、再試、再問為什麼', fill: '#D3F0F3', line: '#5CB9C3', ink: '#237a84',
+      probes: ['先猜！', '試完了，跟你猜的一樣嗎？', '為什麼？'],
+      open: [
+        { q: '陀螺放到水裡會轉嗎？先猜，再試！', tag: '預測', alt: '會轉、不會轉、會轉一下下，猜哪個？', more: ['怎麼讓它在水裡轉久一點？'] }
+      ],
+      pool: [
+        { q: '這台小車放進水裡會沉還是會浮？為什麼？', tag: '預測', alt: '沉、浮，還是一半一半？', more: ['那這個空杯子呢？它也很大喔'] },
+        { q: '肥皂為什麼會起泡泡？', tag: '為什麼', alt: '因為搓、因為水，還是肥皂本來就有泡泡？', more: ['怎麼讓泡泡更多？'] },
+        { q: '泡泡為什麼會破掉？', tag: '為什麼', alt: '碰到東西、太大了，還是太乾了？', more: ['怎麼讓它活久一點？'] },
+        { q: '洗澡要先做什麼？再來？最後？你來排順序。', tag: '順序', alt: '沖水、抹肥皂、洗頭，先哪個？', more: ['為什麼這個先？'] },
+        { q: '這裡是洗車廠，你是老闆！我的車要先洗哪裡？', tag: '想像', alt: '車頂、輪子、車窗，先洗哪裡？', more: ['洗完要怎麼擦乾？'] },
+        { q: '熱水跟冷水，哪一個會冒煙？為什麼？', tag: '觀察', alt: '熱的、冷的，還是都會？', more: ['煙跑到哪裡去了？'] },
+        { q: '水從蓮蓬頭出來，是怎麼跑到排水孔的？', tag: '觀察', alt: '往上流、往下流，還是繞圈圈？', more: ['為什麼水不會往上跑？'] },
+        { q: '用手把水壓下去，水會怎樣？', tag: '預測', alt: '會跑出來、會不見，還是會推回來？', more: ['再試一次，一樣嗎？'] },
+        { q: '杯子倒過來壓進水裡，水會跑進去嗎？', tag: '預測', alt: '會進去、不會進去，還是進去一點點？', more: ['裡面是什麼把水擋住了？'] },
+        { q: '頭髮濕了為什麼會變重？', tag: '為什麼', alt: '因為有水在上面、因為變長了，還是因為變多了？', more: ['怎麼讓它快一點乾？'] },
+        { q: '鏡子為什麼洗澡的時候會變霧霧的？', tag: '為什麼', alt: '熱氣、髒了，還是鏡子壞了？', more: ['用手畫畫看，為什麼畫得出來？'] },
+        { q: '如果水龍頭一直關不起來，會怎樣？要怎麼辦？', tag: '如果', alt: '水會滿出來、會不見，還是會變熱？', more: ['要先叫誰？'] },
+        { q: '毛巾為什麼可以把水吸走？', tag: '為什麼', alt: '有很多小洞、很軟，還是很大？', more: ['濕毛巾還能吸水嗎？'] },
+        { q: '幫陀螺洗澡！你覺得它最髒的地方是哪裡？', tag: '想像', alt: '上面、下面，還是中間尖尖的？', more: ['洗完會轉得更快嗎？試試看'] },
+        { q: '水是什麼顏色？你怎麼知道？', tag: '觀察', alt: '沒有顏色、藍色，還是跟杯子一樣的顏色？', more: ['那海為什麼看起來是藍的？'] },
+        { q: '肥皂水跟清水，哪一個洗得掉手上的油？', tag: '預測', alt: '肥皂水、清水，還是一樣？', more: ['為什麼肥皂可以？'] },
+        { q: '在水裡抬腳，會比在外面輕還是重？', tag: '預測', alt: '比較輕、比較重，還是一樣？', more: ['那手呢？'] },
+        { q: '海綿吸飽水之後，壓它會怎樣？', tag: '預測', alt: '水跑出來、變扁，還是都有？', more: ['放開之後呢？'] },
+        { q: '兩個杯子，一個裝滿、一個裝一半，倒進浴缸哪個倒比較久？', tag: '預測', alt: '滿的、一半的，還是一樣？', more: ['為什麼？'] },
+        { q: '蓮蓬頭的水，手放近跟放遠，哪個比較有力？', tag: '預測', alt: '近的、遠的，還是一樣？', more: ['為什麼？'] }
+      ],
+      close: [
+        { q: '擦乾、穿衣服、刷牙，哪個先？為什麼？', tag: '順序', alt: '擦乾、穿衣服、刷牙，先哪個？', more: ['順序換了會怎樣？'] }
+      ]
+    },
+    {
+      id: 'bed', name: '睡前', tip: '故事四問整組問完；一本書照讀前、讀中、讀後；他睏了就停', fill: '#E7DCF8', line: '#9C85D6', ink: '#6a4fb8',
+      probes: ['然後呢？', '他那時候覺得怎樣？', '為什麼？'],
+      open: [
+        { chain: '共編故事', tag: '故事', steps: [
+          { q: '今天的故事主角是一台什麼車？它叫什麼名字？住在哪裡？', alt: '賽車、卡車、消防車，還是別的？' },
+          { q: '它今天遇到什麼麻煩？在哪裡發生的？', alt: '輪子掉了、迷路了、沒油了，還是別的？' },
+          { q: '它想了什麼辦法？', alt: '找朋友幫忙、自己修、去修車廠，還是別的？' },
+          { q: '最後呢？成功之後它跟誰說？', alt: '媽媽、朋友，還是陀螺？', more: ['明天它想做什麼？'] }
+        ] },
+        { chain: '一本書', tag: '讀書', steps: [
+          { q: '（看封面）你猜這本書在講什麼？', alt: '動物的、車子的、小朋友的，還是別的？' },
+          { q: '（讀到一半）接下來會發生什麼事？', alt: '他會跑掉、留下來、找人幫忙，還是別的？' },
+          { q: '（書裡的人）他為什麼哭？為什麼生氣？為什麼笑？', alt: '東西不見了、被罵了、太開心了，還是別的？' },
+          { q: '（讀完）你講一次這本書給我聽！他漏的不補。', alt: '從開頭講、從最好笑的地方講，還是從結尾講？' },
+          { q: '如果你是他，你會怎麼做？', alt: '跟他一樣、不一樣，還是先問別人？' }
+        ] }
+      ],
+      pool: [
+        { q: '今天有沒有一件事讓你覺得「我好棒」？', tag: '心情', alt: '學校的、家裡的、路上的，哪一件？', more: ['你是怎麼做到的？'] },
+        { q: '今天誰對你最好？你想跟他說什麼？', tag: '心情', alt: '媽媽、爸爸、爺爺奶奶，還是別人？', more: ['明天要怎麼跟他說？'] },
+        { q: '關燈之後房間會變怎樣？你還看得到什麼？', tag: '觀察', alt: '全黑、有一點點亮，還是看得到影子？', more: ['亮的是從哪裡來的？'] },
+        { q: '今天有什麼事，你明天想做得不一樣？', tag: '回憶', alt: '學校的、家裡的，還是跟妹妹的事？', more: ['要怎麼做？'] },
+        { q: '幫今天打分數，一到十分，你給幾分？為什麼？', tag: '選擇', alt: '比五分多、比五分少，還是剛好五分？', more: ['什麼事讓它少了幾分？'] },
+        { q: '妹妹今天做了什麼好笑的事？', tag: '回憶', alt: '吃東西的時候、玩的時候、洗澡的時候，還是別的？', more: ['你那時候在哪裡？'] },
+        { q: '今天晚上你想夢到什麼？夢裡要去哪裡？', tag: '想像', alt: '車車比賽、學校、海邊，還是別的？', more: ['要帶誰一起去？'] },
+        { q: '關燈之後，眼睛要等多久才看得到東西？我們數數看。', tag: '預測', alt: '數到五、數到十，還是更久？', more: ['為什麼要等？'] },
+        { q: '故事裡的那台車，明天會遇到什麼新的事？', tag: '故事', alt: '新朋友、新麻煩，還是去新的地方？', more: ['它會怎麼辦？'] },
+        { q: '今天誰說了一句讓你記得的話？是什麼？', tag: '回憶', alt: '老師說的、同學說的，還是爸媽說的？', more: ['為什麼記得這句？'] },
+        { q: '今天有沒有一件事，做完覺得「下次還要再做」？', tag: '回憶', alt: '學校的、家裡的，還是路上的？', more: ['下次要怎麼做更好？'] }
+      ],
+      close: [
+        { q: '今天三件事：你講第一件，我講第二件，第三件誰講？', tag: '回憶', alt: '早上的、學校的、晚上的，先講哪個？', more: ['哪一件最想明天再做一次？'] },
+        { q: '明天早上你想先玩什麼？要準備什麼？', tag: '計畫', alt: '樂高、陀螺、著色，還是別的？', more: ['現在要先放在哪裡？'] }
+      ]
+    }
+  ];
+
+  var DRAW = 4; // 每天抽幾題補充
+  var $ = function (id) { return document.getElementById(id); };
+  var home = $('home'), slotEl = $('slot');
+  var st = { slot: null, seq: [], pos: 0, step: 0, pool: [], listOpen: false };
+  var timer = null;
+
+  function store(key, val) {
+    try { if (val === undefined) { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } localStorage.setItem(key, JSON.stringify(val)); } catch (e) { return null; }
+  }
+  function today() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function key(s) { return 'qa2-' + s.id + '-' + today(); }
+  function shuffle(n) { var a = []; for (var i = 0; i < n; i++) a.push(i); for (var j = a.length - 1; j > 0; j--) { var k = Math.floor(Math.random() * (j + 1)); var t = a[j]; a[j] = a[k]; a[k] = t; } return a; }
+  function findSlot(id) { for (var i = 0; i < SLOTS.length; i++) if (SLOTS[i].id === id) return SLOTS[i]; return null; }
+  function stepsOf(item) { return item.steps ? item.steps.length : 1; }
+  function countAll(s) { var n = 0; [].concat(s.open, s.pool, s.close).forEach(function (it) { n += stepsOf(it); }); return n; }
+
+  // ---------- home ----------
+  function renderHome() {
+    var tiles = $('tiles'); tiles.innerHTML = '';
+    SLOTS.forEach(function (s) {
+      var b = document.createElement('button');
+      b.className = 'tile';
+      b.style.setProperty('--tile-fill', s.fill); b.style.setProperty('--tile-line', s.line); b.style.setProperty('--tile-ink', s.ink);
+      var fixedN = 0; s.open.concat(s.close).forEach(function (it) { fixedN += stepsOf(it); });
+      b.innerHTML = ICONS[s.id] + '<span class="name">' + s.name + '</span><span class="tip">' + s.tip.split('；')[0] + '</span><span class="count">' + countAll(s) + ' 題 · 每日固定 ' + fixedN + '</span>';
+      b.addEventListener('click', function () { location.hash = '#/' + s.id; });
+      tiles.appendChild(b);
+    });
+  }
+
+  // ---------- sequence ----------
+  function buildSeq(s, poolIdx) {
+    var seq = [];
+    s.open.forEach(function (it, i) { seq.push({ kind: 'open', item: it, i: i }); });
+    poolIdx.forEach(function (pi) { seq.push({ kind: 'pool', item: s.pool[pi], i: pi }); });
+    s.close.forEach(function (it, i) { seq.push({ kind: 'close', item: it, i: i }); });
+    return seq;
+  }
+  function openSlot(id) {
+    var s = findSlot(id); if (!s) { location.hash = ''; return; }
+    st.slot = s;
+    var saved = store(key(s));
+    if (saved && saved.pool) { st.pool = saved.pool; st.pos = saved.pos || 0; st.step = saved.step || 0; }
+    else { st.pool = shuffle(s.pool.length).slice(0, DRAW); st.pos = 0; st.step = 0; }
+    st.seq = buildSeq(s, st.pool);
+    if (st.pos >= st.seq.length) { st.pos = 0; st.step = 0; }
+    st.listOpen = false; $('list').classList.add('hidden'); $('toggleList').classList.remove('on'); $('toggleList').textContent = '看全部題目';
+    slotEl.style.setProperty('--s-fill', s.fill); slotEl.style.setProperty('--s-line', s.line); slotEl.style.setProperty('--s-ink', s.ink);
+    $('slotIcon').innerHTML = ICONS[s.id]; $('slotName').textContent = s.name; $('slotTip').textContent = s.tip;
+    home.classList.add('hidden'); slotEl.classList.remove('hidden');
+    window.scrollTo(0, 0);
+    render();
+  }
+  function save() { if (st.slot) store(key(st.slot), { pool: st.pool, pos: st.pos, step: st.step }); }
+  function cur() { return st.seq[st.pos]; }
+  function curQ() { var e = cur(); return e.item.steps ? e.item.steps[st.step] : e.item; }
+
+  var KIND = { open: '每日開場', pool: '今天補充', close: '收尾' };
+  function kindLabel(e) {
+    var same = st.seq.filter(function (x) { return x.kind === e.kind; });
+    var n = same.indexOf(e) + 1;
+    return KIND[e.kind] + ' ' + n + '/' + same.length;
+  }
+
+  function render() {
+    var s = st.slot, e = cur(), item = e.item, q = curQ();
+    // track
+    var tr = $('track'); tr.innerHTML = '';
+    st.seq.forEach(function (x, i) { var sp = document.createElement('span'); if (i < st.pos) sp.className = 'on'; if (i === st.pos) sp.className = 'cur'; tr.appendChild(sp); });
+    var kd = $('kind'); kd.textContent = kindLabel(e); kd.className = 'kind ' + e.kind;
+    $('tag').textContent = item.tag;
+    var card = $('card'); card.className = 'card' + (item.say ? ' say' : '');
+    var ch = $('chainHead');
+    if (item.steps) {
+      ch.classList.remove('hidden');
+      ch.innerHTML = item.chain + ' · 第 ' + (st.step + 1) + ' 步 / ' + item.steps.length + ' <span class="dots">' + item.steps.map(function (_, i) { return '<i class="' + (i <= st.step ? 'on' : '') + '"></i>'; }).join('') + '</span>';
+    } else ch.classList.add('hidden');
+    $('q').textContent = q.q;
+    $('altLbl').textContent = item.say ? '他沒接話' : '不知道 → 給他幾個選';
+    $('moreLbl').textContent = item.say ? '他接話了' : '說了 → 追問';
+    $('alt').textContent = q.alt;
+    var extras = q.more || [];
+    $('more').innerHTML = (item.say ? '' : '<ol>' + s.probes.map(function (p) { return '<li>' + p + '</li>'; }).join('') + '</ol>') +
+      (extras.length ? '<div class="extra">' + (item.say ? '' : '<b>這題再問：</b>') + extras.join('　') + '</div>' : '');
+    ['hAlt', 'hMore'].forEach(function (id) { $(id).classList.remove('open'); $(id).setAttribute('aria-expanded', 'false'); });
+    resetTimer();
+    var last = st.pos === st.seq.length - 1 && (!item.steps || st.step === item.steps.length - 1);
+    var label = item.steps && st.step < item.steps.length - 1 ? '下一步' : (last ? '這段問完了 · 明天再來' : '下一題');
+    $('next').innerHTML = label + ' <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    $('draw').disabled = st.pool.length >= s.pool.length;
+    if (st.listOpen) renderList();
+    save();
+  }
+  function next() {
+    var e = cur();
+    if (e.item.steps && st.step < e.item.steps.length - 1) { st.step++; render(); return; }
+    if (st.pos >= st.seq.length - 1) { st.pos = 0; st.step = 0; render(); window.scrollTo(0, 0); return; }
+    st.pos++; st.step = 0; render();
+  }
+  function drawOne() {
+    var s = st.slot, left = [];
+    for (var i = 0; i < s.pool.length; i++) if (st.pool.indexOf(i) < 0) left.push(i);
+    if (!left.length) return;
+    var pick = left[Math.floor(Math.random() * left.length)];
+    var curKind = cur().kind;
+    st.pool.push(pick);
+    st.seq = buildSeq(s, st.pool);
+    // 若已在收尾，插入的補充題放在目前題之前；跳到它
+    if (curKind === 'close') { st.pos = st.seq.length - s.close.length - 1; st.step = 0; }
+    render();
+  }
+  function jump(kind, i) {
+    var s = st.slot;
+    if (kind === 'pool' && st.pool.indexOf(i) < 0) { st.pool.push(i); st.seq = buildSeq(s, st.pool); }
+    for (var p = 0; p < st.seq.length; p++) if (st.seq[p].kind === kind && st.seq[p].i === i) { st.pos = p; break; }
+    st.step = 0; render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function renderList() {
+    var s = st.slot, list = $('list'); list.innerHTML = '';
+    function section(title, rows) {
+      if (!rows.length) return;
+      var h = document.createElement('h4'); h.textContent = title; list.appendChild(h);
+      rows.forEach(function (r) { list.appendChild(r); });
+    }
+    function row(e, label, cls) {
+      var d = document.createElement('div'); d.className = 'row' + cls;
+      var n = document.createElement('span'); n.className = 'n'; n.textContent = label;
+      var b = document.createElement('button');
+      b.textContent = e.item.steps ? e.item.chain + '（' + e.item.steps.length + ' 步）' + e.item.steps[0].q : e.item.q;
+      b.addEventListener('click', function () { jump(e.kind, e.i); });
+      d.appendChild(n); d.appendChild(b); return d;
+    }
+    var opens = [], pools = [], closes = [];
+    st.seq.forEach(function (e, p) {
+      var cls = (p < st.pos ? ' done' : '') + (p === st.pos ? ' cur' : '');
+      var r = row(e, kindLabel(e).split(' ')[1], cls);
+      (e.kind === 'open' ? opens : e.kind === 'pool' ? pools : closes).push(r);
+    });
+    section('每日開場', opens); section('今天抽到的補充', pools); section('收尾', closes);
+    var spare = [];
+    s.pool.forEach(function (it, i) { if (st.pool.indexOf(i) < 0) spare.push(row({ kind: 'pool', item: it, i: i }, '＋', ' spare')); });
+    section('還沒抽到的補充題（點了就加進今天）', spare);
+  }
+
+  function resetTimer() { if (timer) { clearInterval(timer); timer = null; } var c = $('count5'); c.className = 'count5'; c.innerHTML = '數到<br>五'; }
+  function startTimer() {
+    if (timer) return;
+    var c = $('count5'), n = 5; c.className = 'count5 run'; c.textContent = n;
+    timer = setInterval(function () { n--; if (n > 0) { c.textContent = n; return; } clearInterval(timer); timer = null; c.className = 'count5 done'; c.innerHTML = '他說了<br>嗎？'; }, 1000);
+  }
+
+  // ---------- events ----------
+  $('back').addEventListener('click', function () { location.hash = ''; });
+  $('next').addEventListener('click', next);
+  $('draw').addEventListener('click', drawOne);
+  $('count5').addEventListener('click', function () { var c = $('count5'); if (c.classList.contains('done')) resetTimer(); else startTimer(); });
+  ['hAlt', 'hMore'].forEach(function (id) { $(id).addEventListener('click', function () { var open = this.classList.toggle('open'); this.setAttribute('aria-expanded', open ? 'true' : 'false'); }); });
+  $('toggleList').addEventListener('click', function () {
+    st.listOpen = !st.listOpen; $('list').classList.toggle('hidden', !st.listOpen);
+    this.classList.toggle('on', st.listOpen); this.textContent = st.listOpen ? '收起題目' : '看全部題目';
+    if (st.listOpen) renderList();
+  });
+  $('reshuffle').addEventListener('click', function () { st.pool = shuffle(st.slot.pool.length).slice(0, DRAW); st.seq = buildSeq(st.slot, st.pool); st.pos = 0; st.step = 0; render(); });
+
+  function route() {
+    var m = /^#\/(\w+)/.exec(location.hash);
+    if (m && findSlot(m[1])) openSlot(m[1]);
+    else { resetTimer(); slotEl.classList.add('hidden'); home.classList.remove('hidden'); }
+  }
+  window.addEventListener('hashchange', route);
+  renderHome();
+  route();
+})();
+</script>
+</body>
+</html>
